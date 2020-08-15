@@ -234,9 +234,9 @@ module.exports = {
         }
     },
     delete: async function(req, res, next) {
-        const no = req.body.id;
-        const client = await pool.connect()
-        const query = queries.deleteDakimakura
+        const no = req.params.id;
+        const client = await pool.connect();
+        const query = queries.deleteDakimakura;
         const param = [no]
         try {
             const result = await client.query(query,param)

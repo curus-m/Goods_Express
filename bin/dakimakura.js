@@ -1,10 +1,10 @@
 const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
-const config = require('../config/config')
 const pool = new Pool()
 const bucketName = "goods-resources";
 const dakimakuraFolder = "resources/dakimakura/";
+const logger = require('./logger');
 const s3Config = {
     accessKeyId: process.env.ACCESS_KEY,
     secretAccessKey: process.env.SECRET_KEY,
@@ -12,7 +12,7 @@ const s3Config = {
     signatureVersion: 'v4'
 }
 const pageItems = 10;
-const s3 = new AWS.S3(s3Config);
+
 
 const checkData  = function(data) {
     const errors = [];
@@ -50,6 +50,7 @@ const changeFile = function (oldFileName, newFileName) {
         CopySource:  `${bucketName}/${dakimakuraFolder}${oldFileName}`,
         ACL: "public-read"
     }
+    let s3 = new AWS.S3(s3Config);
     s3.copyObject(copyParams, (err, data) => {
             return new Promise((resolve, reject) => {
                 if (err) { 
@@ -71,7 +72,7 @@ const deleteFile = function(fileName) {
         Bucket: bucketName, 
         Key:  `${dakimakuraFolder}${fileName}`,
     }
-    
+    let s3 = new AWS.S3(s3Config);
     s3.deleteObject(deleteParams, (err, data) => {
         if (err) { 
             console.log(err, err.stack); // an error occurred
@@ -83,12 +84,12 @@ const deleteFile = function(fileName) {
     });
 }
 const yyyymmddhhmmss = function(date) {
-    var yyyy = date.getFullYear();
-    var mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
-    var dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-    var hh = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-    var min = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-    var ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+    let yyyy = date.getFullYear();
+    let mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
+    let dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+    let hh = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
+    let min = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+    let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
     return "".concat(yyyy).concat(mm).concat(dd).concat(hh).concat(min).concat(ss);
 };
  
@@ -112,6 +113,9 @@ module.exports = {
         }
     },
     getList: async function(req, res, next) {
+        let date = new Date();
+        logger.debug(">>>> Get List on" + date.toISOString());
+
         const pages = req.query.page ? req.query.page : 1;
         let searchQuery = req.query.query ? req.query.query : '';
         searchQuery = `%${searchQuery}%`;
@@ -125,7 +129,7 @@ module.exports = {
             categoryStart = category;
             categoryEnd = category;
         }
-        console.log(`page: ${pages} , query: ${req.query.query}, category: ${category}`);
+        logger.debug(`page: ${pages} , query: ${req.query.query}, category: ${category}`);
         let offset = pageItems * (pages-1);
         const client = await pool.connect();
         const dakiListQuery = queries.getDakiList;

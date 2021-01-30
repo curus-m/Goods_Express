@@ -18,8 +18,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
+//for local use
+app.use('/images', express.static("D:/Goods_Resources/resources/"));
+app.use('/thumbnails', express.static("D:/Goods_Resources/thumbnails/"));
 app.use('/', indexRouter);
 app.use('/dakimakura', dakimakuraRouter);
 app.options('/dakimakura', cors());

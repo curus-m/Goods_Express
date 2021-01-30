@@ -1,7 +1,8 @@
+const pgConfig = require('../config/config');
 const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
-const pool = new Pool()
+const pool = new Pool(pgConfig.postgre);
 const bucketName = "goods-resources";
 const dakimakuraFolder = "resources/dakimakura/";
 const logger = require('./logger');
@@ -12,8 +13,6 @@ const s3Config = {
     signatureVersion: 'v4'
 }
 const pageItems = 10;
-
-
 const checkData  = function(data) {
     const errors = [];
 
@@ -97,12 +96,12 @@ const yyyymmddhhmmss = function(date) {
 module.exports = {
     getItem: async function(req, res, next) {
         const no = req.params.id;
-        console.log(`no: ${no}`);
-        const client = await pool.connect()
-        const query = queries.getDakiItem
+        logger.debug(`Get Daki Item No: ${no}`);
+        const client = await pool.connect();
+        const query = queries.getDakiItem;
         const param = [no]
         try {
-            const result = await client.query(query,param)
+            const result = await client.query(query, param);
             const data = result.rows[0];
             // console.log(data);
             res.json(data);
@@ -114,7 +113,7 @@ module.exports = {
     },
     getList: async function(req, res, next) {
         let date = new Date();
-        logger.debug(">>>> Get List on" + date.toISOString());
+        logger.debug(">>>> Get List on " + date.toISOString());
 
         const pages = req.query.page ? req.query.page : 1;
         let searchQuery = req.query.query ? req.query.query : '';

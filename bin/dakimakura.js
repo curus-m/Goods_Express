@@ -1,10 +1,11 @@
+const imageThumbnail = require('image-thumbnail');
+const fs = require('fs');
 const pgConfig = require('../config/config');
 const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
 const pool = new Pool(pgConfig.postgre);
-const bucketName = "goods-resources";
-const dakimakuraFolder = "resources/dakimakura/";
+const config = require('../config/config');
 const logger = require('./logger');
 const s3Config = {
     accessKeyId: process.env.ACCESS_KEY,
@@ -12,7 +13,7 @@ const s3Config = {
     region: 'ap-northeast-1',
     signatureVersion: 'v4'
 }
-const pageItems = 10;
+const pageItems = 8;
 const checkData  = function(data) {
     const errors = [];
 
@@ -35,18 +36,12 @@ const checkData  = function(data) {
     return errors.length > 0 ? false : true;
 }
 
-const getNewFileName = function(oldFileName) {
-    const date = new Date();
-    let extension = `${oldFileName.split(".")[1]}`
-    let newFileName = `${yyyymmddhhmmss(date)}.${extension}`;
-    return newFileName;
-}
 // change fileName on s3 
-const changeFile = function (oldFileName, newFileName) {
+const changeFileOnS3 = function (oldFileName, newFileName) {
     const copyParams = {
-        Bucket: bucketName, 
-        Key: `${dakimakuraFolder}${newFileName}`,
-        CopySource:  `${bucketName}/${dakimakuraFolder}${oldFileName}`,
+        Bucket: config.bucketName, 
+        Key: `${config.dakimakuraFolder}${newFileName}`,
+        CopySource:  `${config.bucketName}/${config.dakimakuraFolder}${oldFileName}`,
         ACL: "public-read"
     }
     let s3 = new AWS.S3(s3Config);
@@ -65,11 +60,15 @@ const changeFile = function (oldFileName, newFileName) {
             });
     });
 }
-
 const deleteFile = function(fileName) {
+    fs.rm(config.resourcePath+'dakimakura/'+fileName, function(err) {
+        console.log(err);
+    })
+}
+const deleteFileOnS3 = function(fileName) {
     const deleteParams = {
-        Bucket: bucketName, 
-        Key:  `${dakimakuraFolder}${fileName}`,
+        Bucket: config.bucketName, 
+        Key:  `${config.dakimakuraFolder}${fileName}`,
     }
     let s3 = new AWS.S3(s3Config);
     s3.deleteObject(deleteParams, (err, data) => {
@@ -82,17 +81,6 @@ const deleteFile = function(fileName) {
         }
     });
 }
-const yyyymmddhhmmss = function(date) {
-    let yyyy = date.getFullYear();
-    let mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
-    let dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-    let hh = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-    let min = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-    let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-    return "".concat(yyyy).concat(mm).concat(dd).concat(hh).concat(min).concat(ss);
-};
- 
-
 module.exports = {
     getItem: async function(req, res, next) {
         const no = req.params.id;
@@ -153,17 +141,71 @@ module.exports = {
         
     },
     create : async function(req, res, next) {
-        const myData = JSON.parse(Object.keys(req.body)[0]);
+
+        // data check => (image file save) => thumbnail save 
+        const myData = JSON.parse(req.body.data);
         console.log(myData);
         const isOk = checkData(myData);
         if(!isOk) {
             res.status(500).send({ message: 'Invalid Data!'});
         }
         console.log("Data OK!");
+        try{
+            let file =  req.file;
+            const fileName = file.fileName;
+            console.log("name " + file.originalname + " goes to " + fileName);
+            const client = await pool.connect()
+            const query = queries.addDakimakura
+            if (file.originalname) { 
+                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newFileName]
+                console.log(param);
+                client.query(query,param).then((result) => {
+                    console.log("Successfully added");
+                    if (oldFileName != "noimage.jpg") { 
+                        // createThumbnail
+                        let options = { height : 250 }
+                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+fileName, options)
+                        .then(thumbnail => { 
+                            fs.writeFile(config.thumbnailPath+"dakimakura/"+fileName, thumbnail, err => {
+                            if (err) {
+                                console.error(err)
+                            }
+                                //file written successfully
+                            });
+                        })      
+                        .catch(err => console.error(err));
+                    }
+                    res.json({ message: 'OK' });
+                }, (error) => {
+                    console.log(error);
+                    console.log("Fail!");
+                    if (oldFileName != "noimage.jpg") { deleteFile(oldFileName); }
+                })
+            } else { 
+                let defaultFileName = "noimage.jpg";
+                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, defaultFileName]
+                client.query(query,param).then((result) => {
+                    console.log("Successfully added");
+                }, (error) => {
+                    console.log(error);
+                    console.log("Fail!");
+                });
+            }
+        }
+        catch (error) {
+            console.log(error.stack);
+            res.status(500).send({ message: 'Invalid Data!' , contents: error.stack});
+        }finally {
+
+        } 
+        /*
+        try {
+
+            
         const client = await pool.connect()
         const query = queries.addDakimakura
         const oldFileName = myData.fileName;
-        try {
+
             if (myData.fileName) { 
                 let newFileName = getNewFileName(myData.fileName);
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newFileName]
@@ -194,7 +236,7 @@ module.exports = {
             res.status(500).send({ message: 'Invalid Data!' , contents: error.stack});
         }finally {
             client.release();
-        }
+        } */
     },
     update: async function(req, res, next) {
         const myData = JSON.parse(Object.keys(req.body)[0]);

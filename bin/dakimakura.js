@@ -37,11 +37,11 @@ const checkData  = function(data) {
 }
 
 // change fileName on s3 
-const changeFileOnS3 = function (oldFileName, newFileName) {
+const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
     const copyParams = {
         Bucket: config.bucketName, 
         Key: `${config.dakimakuraFolder}${newFileName}`,
-        CopySource:  `${config.bucketName}/${config.dakimakuraFolder}${oldFileName}`,
+        CopySouploadece:  `${config.bucketName}/${config.dakimakuraFolder}${oldFileName}`,
         ACL: "public-read"
     }
     let s3 = new AWS.S3(s3Config);
@@ -54,7 +54,7 @@ const changeFileOnS3 = function (oldFileName, newFileName) {
                 }   
                 else {
                     console.log("Copy complete");
-                    deleteFile(oldFileName);
+                    deleteuploadele(oldFileName);
                     resolve(newFileName);
                 }
             });
@@ -144,7 +144,6 @@ module.exports = {
 
         // data check => (image file save) => thumbnail save 
         const myData = JSON.parse(req.body.data);
-        console.log(myData);
         const isOk = checkData(myData);
         if(!isOk) {
             res.status(500).send({ message: 'Invalid Data!'});
@@ -152,21 +151,22 @@ module.exports = {
         console.log("Data OK!");
         try{
             let file =  req.file;
-            const fileName = file.fileName;
-            console.log("name " + file.originalname + " goes to " + fileName);
+            let newfileName = file.filename;
+            let oldFileName = file.originalname;
+            console.log("name " + oldFileName + " goes to " + newfileName);
             const client = await pool.connect()
             const query = queries.addDakimakura
-            if (file.originalname) { 
-                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newFileName]
+            if (oldFileName) { 
+                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newfileName]
                 console.log(param);
                 client.query(query,param).then((result) => {
                     console.log("Successfully added");
                     if (oldFileName != "noimage.jpg") { 
-                        // createThumbnail
+                        // create Thumbnail
                         let options = { height : 250 }
-                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+fileName, options)
+                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+newfileName, options)
                         .then(thumbnail => { 
-                            fs.writeFile(config.thumbnailPath+"dakimakura/"+fileName, thumbnail, err => {
+                            fs.writeFile(config.thumbnailPath+"dakimakura/"+newfileName, thumbnail, err => {
                             if (err) {
                                 console.error(err)
                             }
@@ -204,7 +204,7 @@ module.exports = {
             
         const client = await pool.connect()
         const query = queries.addDakimakura
-        const oldFileName = myData.fileName;
+        const uploadedFileName = myData.fileName;
 
             if (myData.fileName) { 
                 let newFileName = getNewFileName(myData.fileName);
@@ -212,14 +212,14 @@ module.exports = {
                 console.log(param);
                 client.query(query,param).then((result) => {
                     console.log("Successfully added");
-                    if (oldFileName != "noimage.jpg") { 
-                        changeFile(oldFileName, newFileName);
+                    if (oluploadeileName != "noimage.jpg") { 
+                        changeuploadele(oldFileName, newFileName);
                     }
                     res.json({ message: 'OK' });
                 }, (error) => {
                     console.log(error);
                     console.log("Fail!");
-                    if (oldFileName != "noimage.jpg") { deleteFile(oldFileName); }
+                    if (oluploadeileName != "noimage.jpg") { deleteFile(oldFileName); }
                 })
             } else { 
                 let defaultFileName = "noimage.jpg";
@@ -239,27 +239,23 @@ module.exports = {
         } */
     },
     update: async function(req, res, next) {
-        const myData = JSON.parse(Object.keys(req.body)[0]);
+        const myData = JSON.parse(req.body.data);
         console.log(myData);
         const isOk = checkData(myData);
         if(!isOk) {
             callback(null, createResponse(404, { message: 'Invalid Data!'}));
         }
         console.log("Data OK!");
-    
         const client = await pool.connect()
-        let fileName = ""; // it is original
-        let oldFileName = myData.fileName;
         let query, param;
         try {
-            if (myData.fileName) { 
-                let newFileName = getNewFileName(myData.fileName);
+            let file =  req.file;
+            const newfileName = file.filename;
+            const uploadedFileName = file.originalname;
+            if (uploadedFileName) { 
                 // image change 
                 query = queries.updateDakimakura;
-                param = [myData.id, myData.name, myData.brand, myData.price, myData.material, myData.releasedate, myData.description, newFileName];
-                if (oldFileName != "noimage.jpg") { 
-                    changeFile(oldFileName, newFileName);
-                }
+                param = [myData.id, myData.name, myData.brand, myData.price, myData.material, myData.releasedate, myData.description, newfileName];
             } else { 
                 // pass image update
                 fileName = "noimage.jpg";
@@ -275,7 +271,7 @@ module.exports = {
             res.status(500).send({ message: 'Invalid Data!', contents : error.stack});
         } finally {
             client.release()
-            if (myData.fileName) { deleteFile(oldFileName);}
+            if (myuploadeta.fileName) { deleteFile(oldFileName);}
         }
     },
     delete: async function(req, res, next) {

@@ -2,9 +2,10 @@ var express = require('express');
 var router = express.Router();
 var dakimakura = require('../bin/dakimakura');
 var multer  = require('multer');
+var config = require('../config/config');
 var storageSetting = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'D:/Dev/nodeTest/')
+    cb(null, config.resourcePath+"dakimakura/")
   },
   filename: function (req, file, cb) {
     let splits = file.originalname.split(".");

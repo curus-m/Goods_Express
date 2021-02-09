@@ -62,7 +62,7 @@ const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
 }
 const deleteFile = function(fileName) {
     fs.rm(config.resourcePath+'dakimakura/'+fileName, function(err) {
-        console.log(err);
+        logger.error(err);
     })
 }
 const deleteFileOnS3 = function(fileName) {
@@ -94,7 +94,7 @@ module.exports = {
             // console.log(data);
             res.json(data);
         } catch (error) {
-            console.log(err.stack);
+            logger.error(err.stack);
         } finally {
             client.release()
         }
@@ -116,7 +116,7 @@ module.exports = {
             categoryStart = category;
             categoryEnd = category;
         }
-        logger.debug(`page: ${pages} , query: ${req.query.query}, category: ${category}`);
+        logger.info(`page: ${pages} , query: ${req.query.query}, category: ${category}`);
         let offset = pageItems * (pages-1);
         const client = await pool.connect();
         const dakiListQuery = queries.getDakiList;
@@ -133,7 +133,7 @@ module.exports = {
             }
             res.json(data);
         } catch(err){
-            console.log(err.stack);
+            logger.error(err.stack);
             res.status(500).send({ message: 'Invalid Data!' , contents: error.stack});
         } finally {
             client.release()
@@ -141,59 +141,56 @@ module.exports = {
         
     },
     create : async function(req, res, next) {
-
-        // data check => (image file save) => thumbnail save 
         const myData = JSON.parse(req.body.data);
         const isOk = checkData(myData);
         if(!isOk) {
             res.status(500).send({ message: 'Invalid Data!'});
         }
-        console.log("Data OK!");
+        logger.debug("Data OK!");
         try{
             let file =  req.file;
             let newfileName = file.filename;
             let oldFileName = file.originalname;
-            console.log("name " + oldFileName + " goes to " + newfileName);
+            logger.debug("name " + oldFileName + " goes to " + newfileName);
             const client = await pool.connect()
             const query = queries.addDakimakura
             if (oldFileName) { 
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newfileName]
-                console.log(param);
+                logger.debug(param);
                 client.query(query,param).then((result) => {
-                    console.log("Successfully added");
+                    logger.info("Successfully added: ", myData.name);
                     if (oldFileName != "noimage.jpg") { 
-                        // create Thumbnail
-                        let options = { height : 250 }
-                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+newfileName, options)
+                        let thumbnailOptions = { height : 250 }
+                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+newfileName, thumbnailOptions)
                         .then(thumbnail => { 
                             fs.writeFile(config.thumbnailPath+"dakimakura/"+newfileName, thumbnail, err => {
                             if (err) {
-                                console.error(err)
+                                logger.error(err);
                             }
                                 //file written successfully
                             });
                         })      
-                        .catch(err => console.error(err));
+                        .catch(err => logger.error(err));
                     }
                     res.json({ message: 'OK' });
                 }, (error) => {
-                    console.log(error);
-                    console.log("Fail!");
+                    logger.log(error);
+                    logger.log("Fail!");
                     if (oldFileName != "noimage.jpg") { deleteFile(oldFileName); }
                 })
             } else { 
                 let defaultFileName = "noimage.jpg";
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, defaultFileName]
                 client.query(query,param).then((result) => {
-                    console.log("Successfully added");
+                    logger.info("Successfully added", myData.name);
                 }, (error) => {
-                    console.log(error);
-                    console.log("Fail!");
+                    logger.error(error);
+                    logger.error("Fail!");
                 });
             }
         }
         catch (error) {
-            console.log(error.stack);
+            logger.error(error.stack);
             res.status(500).send({ message: 'Invalid Data!' , contents: error.stack});
         }finally {
 
@@ -240,13 +237,11 @@ module.exports = {
     },
     update: async function(req, res, next) {
         const myData = JSON.parse(req.body.data);
-        console.log(myData);
         const isOk = checkData(myData);
         if(!isOk) {
             callback(null, createResponse(404, { message: 'Invalid Data!'}));
         }
-        console.log("Data OK!");
-        const client = await pool.connect()
+        const client = await pool.connect();
         let query, param;
         try {
             let file =  req.file;
@@ -262,12 +257,12 @@ module.exports = {
                 query = queries.updateDakimakuraNoImage;
                 param = [myData.id, myData.name, myData.brand, myData.price, myData.material, myData.releasedate, myData.description];
             }
-            console.log(param);
+            logger.debug(param);
             const result = await client.query(query,param)
-            console.log("Update Complete");
+            logger.info("Update Complete", myData.name);
             res.json({ message: 'OK' });
         } catch (error) {
-            console.log(error.stack);
+            logger.err(error.stack);
             res.status(500).send({ message: 'Invalid Data!', contents : error.stack});
         } finally {
             client.release()
@@ -281,10 +276,10 @@ module.exports = {
         const param = [no]
         try {
             const result = await client.query(query,param)
-            console.log(result.rows[0])
+            logger.debug(result.rows[0])
             res.json({ message: 'OK' });
         } catch(error) {
-            console.log(error.stack);
+            logger.error(error.stack);
             res.status(500).send({ message: 'error!', contents : error.stack});
         }finally {
             client.release();

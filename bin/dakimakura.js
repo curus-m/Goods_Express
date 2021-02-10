@@ -7,12 +7,14 @@ const queries = require('../config/queries')
 const pool = new Pool(pgConfig.postgre);
 const config = require('../config/config');
 const logger = require('./logger');
+const defaultImageName = "noimage.jpg"
 const s3Config = {
     accessKeyId: process.env.ACCESS_KEY,
     secretAccessKey: process.env.SECRET_KEY,
     region: 'ap-northeast-1',
     signatureVersion: 'v4'
 }
+const thumbnailOptions = { height : 250 }
 const pageItems = 8;
 const checkData  = function(data) {
     const errors = [];
@@ -60,10 +62,26 @@ const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
             });
     });
 }
-const deleteFile = function(fileName) {
+const deleteImage = function(fileName) {
     fs.rm(config.resourcePath+'dakimakura/'+fileName, function(err) {
         logger.error(err);
-    })
+    });
+    fs.rm(config.thumbnailPath+'dakimakura/'+fileName, function(err) {
+        logger.error(err);
+    });
+}
+const createThumbnail = function(filename) {
+    const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+filename, thumbnailOptions)
+    .then(thumbnail => { 
+        fs.writeFile(config.thumbnailPath+"dakimakura/"+filename, thumbnail, err => {
+        if (err) {
+            logger.error(err);
+        }
+            //file written successfully
+        });
+    })      
+    .catch(err => logger.error(err));
+
 }
 const deleteFileOnS3 = function(fileName) {
     const deleteParams = {
@@ -148,38 +166,27 @@ module.exports = {
         }
         logger.debug("Data OK!");
         try{
-            let file =  req.file;
-            let newfileName = file.filename;
-            let oldFileName = file.originalname;
-            logger.debug("name " + oldFileName + " goes to " + newfileName);
-            const client = await pool.connect()
-            const query = queries.addDakimakura
-            if (oldFileName) { 
+            if (req.file !== undefined) { 
+                let newfileName = req.file.filename;
+                let oldFileName = req.file.originalname;
+                logger.debug("name " + oldFileName + " goes to " + newfileName);
+                const client = await pool.connect()
+                const query = queries.addDakimakura
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newfileName]
                 logger.debug(param);
                 client.query(query,param).then((result) => {
                     logger.info("Successfully added: ", myData.name);
-                    if (oldFileName != "noimage.jpg") { 
-                        let thumbnailOptions = { height : 250 }
-                        const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+newfileName, thumbnailOptions)
-                        .then(thumbnail => { 
-                            fs.writeFile(config.thumbnailPath+"dakimakura/"+newfileName, thumbnail, err => {
-                            if (err) {
-                                logger.error(err);
-                            }
-                                //file written successfully
-                            });
-                        })      
-                        .catch(err => logger.error(err));
+                    if (oldFileName != defaultImageName) { 
+                        createThumbnail(newfileName);
                     }
                     res.json({ message: 'OK' });
                 }, (error) => {
                     logger.log(error);
                     logger.log("Fail!");
-                    if (oldFileName != "noimage.jpg") { deleteFile(oldFileName); }
+                    if (oldFileName != defaultImageName) { deleteImage(oldFileName); }
                 })
             } else { 
-                let defaultFileName = "noimage.jpg";
+                let defaultFileName = defaultImageName;
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, defaultFileName]
                 client.query(query,param).then((result) => {
                     logger.info("Successfully added", myData.name);
@@ -209,17 +216,17 @@ module.exports = {
                 console.log(param);
                 client.query(query,param).then((result) => {
                     console.log("Successfully added");
-                    if (oluploadeileName != "noimage.jpg") { 
+                    if (oluploadeileName != defaultImageName) { 
                         changeuploadele(oldFileName, newFileName);
                     }
                     res.json({ message: 'OK' });
                 }, (error) => {
                     console.log(error);
                     console.log("Fail!");
-                    if (oluploadeileName != "noimage.jpg") { deleteFile(oldFileName); }
+                    if (oluploadeileName != defaultImageName) { deleteFile(oldFileName); }
                 })
             } else { 
-                let defaultFileName = "noimage.jpg";
+                let defaultFileName = defaultImageName;
                 const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, defaultFileName]
                 client.query(query,param).then((result) => {
                     console.log("Successfully added");
@@ -244,16 +251,16 @@ module.exports = {
         const client = await pool.connect();
         let query, param;
         try {
-            let file =  req.file;
-            const newfileName = file.filename;
-            const uploadedFileName = file.originalname;
-            if (uploadedFileName) { 
+            if (req.file !== undefined) { 
+                const newfileName = req.file.filename;
+                const uploadedFileName = myData.originalImage;
                 // image change 
                 query = queries.updateDakimakura;
                 param = [myData.id, myData.name, myData.brand, myData.price, myData.material, myData.releasedate, myData.description, newfileName];
+                createThumbnail(newfileName);
+                if (uploadedFileName !== defaultImageName) { deleteImage(uploadedFileName);}
             } else { 
                 // pass image update
-                fileName = "noimage.jpg";
                 query = queries.updateDakimakuraNoImage;
                 param = [myData.id, myData.name, myData.brand, myData.price, myData.material, myData.releasedate, myData.description];
             }
@@ -266,18 +273,25 @@ module.exports = {
             res.status(500).send({ message: 'Invalid Data!', contents : error.stack});
         } finally {
             client.release()
-            if (myuploadeta.fileName) { deleteFile(oldFileName);}
+          
         }
     },
     delete: async function(req, res, next) {
         const no = req.params.id;
         const client = await pool.connect();
-        const query = queries.deleteDakimakura;
         const param = [no]
         try {
-            const result = await client.query(query,param)
+            let query = queries.getDakiItem;
+            let result = await client.query(query, param);
+            const data = result.rows[0];
+            const filename = data.image;
+            query =  queries.deleteDakimakura;
+            result = await client.query(query,param)
             logger.debug(result.rows[0])
             res.json({ message: 'OK' });
+            if(filename !== defaultImageName) {
+                deleteImage(oldFileName);
+            }
         } catch(error) {
             logger.error(error.stack);
             res.status(500).send({ message: 'error!', contents : error.stack});

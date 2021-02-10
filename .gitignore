@@ -1,6 +1,4 @@
 error.log
-20210121.log
-20210123.log
 node_modules/.bin/acorn
 node_modules/.bin/acorn.cmd
 node_modules/.bin/acorn.ps1
@@ -3272,12 +3270,6 @@ node_modules/winston-transport/node_modules/string_decoder/LICENSE
 node_modules/winston-transport/node_modules/string_decoder/package.json
 node_modules/winston-transport/node_modules/string_decoder/README.md
 node_modules/winston-transport/node_modules/string_decoder/lib/string_decoder.js
-20210124.log
-20210126.log
-20210128.log
-20210129.log
-20210130.log
-20210131.log
 node_modules/.bin/detect-libc
 node_modules/.bin/detect-libc.cmd
 node_modules/.bin/detect-libc.ps1
@@ -5366,10 +5358,6 @@ node_modules/yallist/LICENSE
 node_modules/yallist/package.json
 node_modules/yallist/README.md
 node_modules/yallist/yallist.js
-20210201.log
-20210202.log
-20210206.log
-20210207.log
 node_modules/.bin/parser
 node_modules/.bin/parser.cmd
 node_modules/.bin/parser.ps1

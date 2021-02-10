@@ -26,7 +26,7 @@ const logger = module.exports = winston.createLogger({
     // - Write all logs with level `info` and below to `combined.log`
     //
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: `${dateString}.log` }),
+    new winston.transports.File({ filename: 'D:/Goods_Resources/logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: `D:/Goods_Resources/logs/${dateString}.log` }),
   ],
 });

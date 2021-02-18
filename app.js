@@ -1,14 +1,15 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
 const logger = require('./bin/logger')
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var dakimakuraRouter = require('./routes/dakimakura');
-var resourceRouter = require('./routes/resource');
-var cors = require('cors');
-var app = express();
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const dakimakuraRouter = require('./routes/dakimakura');
+const resourceRouter = require('./routes/resource');
+const cors = require('cors');
+const app = express();
+const config = require('./config/config');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,8 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 //for local use
-app.use('/images', express.static("D:/Goods_Resources/resources/"));
-app.use('/thumbnails', express.static("D:/Goods_Resources/thumbnails/"));
+app.use('/images', express.static(config.resourcePath));
+app.use('/thumbnails', express.static(config.thumbnailPath));
 app.use('/', indexRouter);
 app.use('/dakimakura', dakimakuraRouter);
 app.options('/dakimakura', cors());

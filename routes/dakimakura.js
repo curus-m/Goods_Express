@@ -22,7 +22,7 @@ var storageSetting = multer.diskStorage({
 
   }
 })
-var upload = multer({ storage: storageSetting })
+let upload = multer({ storage: storageSetting })
 /* GET home page. */
 router.get('/', function(req, res, next) {
     console.log(`${req.originalUrl} / ${req.method}`);
@@ -37,8 +37,7 @@ router.get('/:id', function (req, res, next) {
     else next(); //
   }, dakimakura.getItem);
 
-router.post('/', upload.single('file'), dakimakura.create);
-router.put('/:id', dakimakura.update);
 router.delete('/:id', dakimakura.delete);
-
+router.post('/', upload.single('file'), dakimakura.create);
+router.put('/:id', upload.single('file'), dakimakura.update);
 module.exports = router;

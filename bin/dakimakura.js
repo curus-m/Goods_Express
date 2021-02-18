@@ -34,7 +34,7 @@ const checkData  = function(data) {
     if (!data.releasedate) {
         errors.push("Date Error");
     }
-    console.log("errors:" + errors);
+    console.log("errors:" + errors.length);
     return errors.length > 0 ? false : true;
 }
 

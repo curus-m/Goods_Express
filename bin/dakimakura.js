@@ -171,15 +171,19 @@ module.exports = {
                 let oldFileName = req.file.originalname;
                 logger.debug("name " + oldFileName + " goes to " + newfileName);
                 const client = await pool.connect()
-                const query = queries.addDakimakura
-                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newfileName]
+                let query = queries.addDakimakura
+                let param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newfileName]
                 logger.debug(param);
                 client.query(query,param).then((result) => {
                     logger.info("Successfully added: ", myData.name);
                     if (oldFileName != defaultImageName) { 
                         createThumbnail(newfileName);
                     }
-                    res.json({ message: 'OK' });
+                    query = queries.getDakiId;
+                    param = [myData.name, myData.brand, myData.price];
+                    client.query(query,param).then(result => {
+                        res.json({ message: 'OK', id: result });
+                    });
                 }, (error) => {
                     logger.log(error);
                     logger.log("Fail!");

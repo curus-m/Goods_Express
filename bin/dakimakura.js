@@ -112,7 +112,7 @@ module.exports = {
             // console.log(data);
             res.json(data);
         } catch (error) {
-            logger.error(err.stack);
+            logger.error(error.stack);
         } finally {
             client.release()
         }
@@ -182,7 +182,7 @@ module.exports = {
                     query = queries.getDakiId;
                     param = [myData.name, myData.brand, myData.price];
                     client.query(query,param).then(result => {
-                        res.json({ message: 'OK', id: result });
+                        res.json({ message: 'OK', id: result.rows[0].id });
                     });
                 }, (error) => {
                     logger.log(error);
@@ -294,7 +294,7 @@ module.exports = {
             logger.debug(result.rows[0])
             res.json({ message: 'OK' });
             if(filename !== defaultImageName) {
-                deleteImage(oldFileName);
+                deleteImage(filename);
             }
         } catch(error) {
             logger.error(error.stack);

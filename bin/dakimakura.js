@@ -1,10 +1,13 @@
+const express = require('express');
+const app = express();
 const imageThumbnail = require('image-thumbnail');
 const fs = require('fs');
 const pgConfig = require('../config/config');
 const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
-const pool = new Pool(pgConfig.postgre);
+const env = app.get('env');
+const pool = new Pool(pgConfig[env].postgre);
 const config = require('../config/config');
 const logger = require('./logger');
 const defaultImageName = "noimage.jpg"
@@ -63,17 +66,17 @@ const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
     });
 }
 const deleteImage = function(fileName) {
-    fs.rm(config.resourcePath+'dakimakura/'+fileName, function(err) {
+    fs.rm(config[env].resourcePath+'dakimakura/'+fileName, function(err) {
         logger.error(err);
     });
-    fs.rm(config.thumbnailPath+'dakimakura/'+fileName, function(err) {
+    fs.rm(config[env].thumbnailPath+'dakimakura/'+fileName, function(err) {
         logger.error(err);
     });
 }
 const createThumbnail = function(filename) {
-    const thumbnail = imageThumbnail(config.resourcePath+'dakimakura/'+filename, thumbnailOptions)
+    const thumbnail = imageThumbnail(config[env].resourcePath+'dakimakura/'+filename, thumbnailOptions)
     .then(thumbnail => { 
-        fs.writeFile(config.thumbnailPath+"dakimakura/"+filename, thumbnail, err => {
+        fs.writeFile(config[env].thumbnailPath+"dakimakura/"+filename, thumbnail, err => {
         if (err) {
             logger.error(err);
         }

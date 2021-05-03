@@ -1,15 +1,18 @@
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
+const express = require('express');
+const app = express();
+const env = app.get('env');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
-const config = require('../config/config')
-const pool = new Pool()
+const pgConfig = require('../config/config')
+const pool = new Pool(pgConfig[env].postgre);
 const bucketName = "goods-resources";
 const resourceFolder = "resources/dakimakura/";
 const thumbnailFolder = "resources/thumbnail/";
 const logger = require('./logger');
 
 module.exports = {
-    getPreSignedURL : function(req, res, next) {
+    /*getPreSignedURL : function(req, res, next) {
         let requestObject = JSON.parse(req.body);
         const fileName = requestObject.fileName;
         const category = requestObject.category;
@@ -50,7 +53,7 @@ module.exports = {
           res.json(url);
         }
       });
-  },    
+  },  */  
     getMaterials : async function(req, res, next) {
           const client = await pool.connect()
           const query = queries.getMaterialList;

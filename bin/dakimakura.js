@@ -3,7 +3,7 @@ const app = express();
 const imageThumbnail = require('image-thumbnail');
 const fs = require('fs');
 const pgConfig = require('../config/config');
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
 const env = app.get('env');
@@ -42,7 +42,7 @@ const checkData  = function(data) {
 }
 
 // change fileName on s3 
-const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
+/* const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
     const copyParams = {
         Bucket: config.bucketName, 
         Key: `${config.dakimakuraFolder}${newFileName}`,
@@ -64,7 +64,7 @@ const uploadeangeFileOnS3 = function (oldFileName, newFileName) {
                 }
             });
     });
-}
+}*/
 const deleteImage = function(fileName) {
     fs.rm(config[env].resourcePath+'dakimakura/'+fileName, function(err) {
         logger.error(err);
@@ -86,6 +86,7 @@ const createThumbnail = function(filename) {
     .catch(err => logger.error(err));
 
 }
+/*
 const deleteFileOnS3 = function(fileName) {
     const deleteParams = {
         Bucket: config.bucketName, 
@@ -101,7 +102,7 @@ const deleteFileOnS3 = function(fileName) {
             console.log("delete Complete")
         }
     });
-}
+}*/
 module.exports = {
     getItem: async function(req, res, next) {
         const no = req.params.id;

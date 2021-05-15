@@ -113,7 +113,8 @@ module.exports = {
         try {
             const result = await client.query(query, param);
             const data = result.rows[0];
-            // console.log(data);
+            logger.debug(`Get Daki Item No: ${no}`);
+            // logger.debug(JSON.stringify(data));
             res.json(data);
         } catch (error) {
             logger.error(error.stack);

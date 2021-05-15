@@ -4,11 +4,14 @@ const env = app.get('env');
 const winston = require('winston');
 const { format } = require('winston');
 const config = require("../config/config");
-const date = new Date();
-let yyyy = date.getFullYear();
-let mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
-let dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-const dateLog= "".concat(yyyy).concat(mm).concat(dd).concat(".log");
+const dateLog = function() {
+  const date = new Date();
+  let yyyy = new Date().getFullYear();
+  let mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
+  let dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+  return "".concat(yyyy).concat(mm).concat(dd).concat(".log");
+}
+
 
 
 const { combine, timestamp, label, printf } = format;
@@ -31,6 +34,6 @@ const logger = module.exports = winston.createLogger({
     //
     new winston.transports.Console(),
     new winston.transports.File({ filename: config[env].logFilePath+"error.log", level: 'error' }),
-    new winston.transports.File({ filename: config[env].logFilePath+dateLog }),
+    new winston.transports.File({ filename: config[env].logFilePath+dateLog() }),
   ],
 });

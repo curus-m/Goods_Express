@@ -8,13 +8,13 @@ const thermometer = require('./ds18b20');
 module.exports = {
   getTemp: function(req, res, next) {
     // logger.log("info", `Now temperature is ${temp}℃`);
-    const temp = thermometer.getTempData();
     let date = moment().format(config.dateString.temperature);
-    // console.log(date + ": "+temp);
+    let temp = thermometer.getTempData();
     const tempData = {
         "time": date,
         "temp": temp
     }
+    // console.log(date + ": "+temp);
     res.json(tempData);
   }
 }

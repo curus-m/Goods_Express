@@ -1,15 +1,18 @@
+const express = require('express');
+const app = express();
+const env = app.get('env');
 const config = require('../config/config')
 const moment = require('moment');
 const thermometer = require('./ds18b20');
 // const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const pool = new Pool(config[env].postgre);
-const queries = require('../config/queries')
-const moment = require('moment');
+const queries = require('../config/queries');
+const logger = require('./logger');
 module.exports = {
-    addTemperature: function() {
+    addTemperature: async function() {
         let temp = thermometer.getTempData();
-        let date = moment().format("YYYY-MM-DD HH:mm:00");
+        let date = moment().format(config.dateString.temperature);
         const client = await pool.connect();
         const query = queries.createThermoData;
         const param = [date, temp, 0]

@@ -5,14 +5,8 @@ const logger = require('./logger');
 
 module.exports = {
     getTempData: function() {
-        fs.readFile(fileName, 'utf8' , (err, data) => {
-            if (err) {
-              logger.error("Error Occured in Temperature");
-              logger.error(err);
-              return;
-            }
-            let temp = data.slice(69).trim()*0.001;
-            return temp;
-          })
+        let data = fs.readFileSync(fileName,'utf-8');
+        let temp = data.slice(69).trim()*0.001;
+        return temp;
     }
 }

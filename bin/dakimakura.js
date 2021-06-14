@@ -2,21 +2,20 @@ const express = require('express');
 const app = express();
 const imageThumbnail = require('image-thumbnail');
 const fs = require('fs');
-const pgConfig = require('../config/config');
+const config = require('../config/config');
 // const AWS = require('aws-sdk');
 const { Pool } = require('pg')
 const queries = require('../config/queries')
 const env = app.get('env');
-const pool = new Pool(pgConfig[env].postgre);
-const config = require('../config/config');
+const pool = new Pool(config[env].postgre);
 const logger = require('./logger');
 const defaultImageName = "noimage.jpg"
-const s3Config = {
-    accessKeyId: process.env.ACCESS_KEY,
-    secretAccessKey: process.env.SECRET_KEY,
-    region: 'ap-northeast-1',
-    signatureVersion: 'v4'
-}
+// const s3Config = {
+//     accessKeyId: process.env.ACCESS_KEY,
+//     secretAccessKey: process.env.SECRET_KEY,
+//     region: 'ap-northeast-1',
+//     signatureVersion: 'v4'
+// }
 const thumbnailOptions = { height : 250 }
 const pageItems = 8;
 const checkData  = function(data) {

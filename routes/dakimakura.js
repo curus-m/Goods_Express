@@ -5,6 +5,7 @@ var multer  = require('multer');
 var config = require('../config/config');
 var app = express();
 var env = app.get('env');
+const moment = require('moment');
 var storageSetting = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, config[env].resourcePath+"dakimakura/")
@@ -12,16 +13,8 @@ var storageSetting = multer.diskStorage({
   filename: function (req, file, cb) {
     let splits = file.originalname.split(".");
     const extensionName = splits[splits.length-1];
-    const date = new Date();  
-    let yyyy = date.getFullYear();
-    let mm = date.getMonth() < 9 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1); // getMonth() is zero-based
-    let dd  = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-    let hh = date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-    let min = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-    let ss = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-    let fileName = "".concat(yyyy).concat(mm).concat(dd).concat(hh).concat(min).concat(ss)+"."+extensionName;
+    let fileName = moment().format(config.dateString.resource).concat(".")+extensionName;
     cb(null, fileName);
-
   }
 })
 let upload = multer({ storage: storageSetting })

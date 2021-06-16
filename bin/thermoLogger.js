@@ -8,13 +8,13 @@ const thermometer = require('./ds18b20');
 const { Pool } = require('pg')
 const pool = new Pool(config[env].postgre);
 const queries = require('../config/queries');
-const logger = require('./logger');
+const logger = require('../config/logger');
 module.exports = {
     addTemperature: async function() {
         let temp = thermometer.getTempData();
         let date = moment().format(config.dateString.temperature);
         const client = await pool.connect();
-        const query = queries.createThermoData;
+        const query = queries.createTemperatureData;
         const param = [date, temp, 0]
         try {
             const result = await client.query(query, param);

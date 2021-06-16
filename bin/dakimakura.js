@@ -5,10 +5,10 @@ const fs = require('fs');
 const config = require('../config/config');
 // const AWS = require('aws-sdk');
 const { Pool } = require('pg')
+const logger = require('../config/logger');
 const queries = require('../config/queries')
 const env = app.get('env');
 const pool = new Pool(config[env].postgre);
-const logger = require('./logger');
 const defaultImageName = "noimage.jpg"
 // const s3Config = {
 //     accessKeyId: process.env.ACCESS_KEY,

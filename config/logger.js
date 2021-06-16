@@ -3,7 +3,7 @@ const app = express();
 const env = app.get('env');
 const winston = require('winston');
 const { format } = require('winston');
-const config = require("../config/config");
+const config = require("./config");
 const moment = require('moment');
 const { combine, timestamp, label, printf } = format;
 

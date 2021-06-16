@@ -2,7 +2,7 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('./bin/logger')
+const logger = require('./config/logger')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const dakimakuraRouter = require('./routes/dakimakura');
@@ -49,7 +49,7 @@ app.use(function(err, req, res, next) {
 logger.info('App Initialized!');
 
 // set temperature check
-const job = schedule.scheduleJob("0 */6 * * * *", function () {
+const job = schedule.scheduleJob("0 */20 * * * *", function () {
   thermoLogger.addTemperature();
 });
 

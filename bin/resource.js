@@ -6,10 +6,10 @@ const { Pool } = require('pg')
 const queries = require('../config/queries')
 const pgConfig = require('../config/config')
 const pool = new Pool(pgConfig[env].postgre);
-const bucketName = "goods-resources";
-const resourceFolder = "resources/dakimakura/";
-const thumbnailFolder = "resources/thumbnail/";
-const logger = require('./logger');
+// const bucketName = "goods-resources";
+// const resourceFolder = "resources/dakimakura/";
+// const thumbnailFolder = "resources/thumbnail/";
+// const logger = require('../config/logger');
 
 module.exports = {
     /*getPreSignedURL : function(req, res, next) {

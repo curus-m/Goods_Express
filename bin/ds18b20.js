@@ -1,7 +1,7 @@
 const config = require('../config/config')
 const fileName = `${config.production.tempDevicePath}${config.production.tempDeviceName}${config.production.tempFileName}`;
 const fs = require('fs')
-const logger = require('./logger');
+// const logger = require('../config/logger');
 
 module.exports = {
     getTempData: function() {

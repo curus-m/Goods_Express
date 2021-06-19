@@ -12,7 +12,7 @@ const app = express();
 const config = require('./config/config');
 const env = app.get('env');
 const schedule = require('node-schedule');
-const thermoLogger = require('./bin/thermoLogger');
+const thermoLogger = require('./bin/thermometer/thermometer');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -46,10 +46,11 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-logger.info('App Initialized!');
+
+logger.info(`App Initialized! : ${env} mode`);
 
 // set temperature check
-const job = schedule.scheduleJob("0 */20 * * * *", function () {
+const job = schedule.scheduleJob("0 */20 * * * *", async function () {
   thermoLogger.addTemperature();
 });
 

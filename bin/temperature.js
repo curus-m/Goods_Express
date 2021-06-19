@@ -7,21 +7,25 @@ const app = express();
 const env = app.get('env');
 const config = require('../config/config')
 const moment = require('moment');
-const thermometer = require('./ds18b20');
+const thermometer = require('./thermometer/dht11');
 const { Pool } = require('pg')
 const pool = new Pool(config[env].postgre);
 const queries = require('../config/queries');
+const logger = require('../config/logger');
 module.exports = {
   getTemp: function(req, res, next) {
     // logger.log("info", `Now temperature is ${temp}℃`);
-    let date = moment().format(config.dateString.temperature);
-    let temp = thermometer.getTempData();
-    const tempData = {
-        "time": date,
-        "temp": temp
-    }
-    // console.log(date + ": "+temp);
-    res.json(tempData);
+    (async () => {
+      let date = moment().format(config.dateString.temperature);
+      let temp = await thermometer.getTemperature();
+      // logger.debug("tempData: " +temp);
+      const tempData = {
+          "time": date,
+          "temperature": temp.temperature,
+          "humidity": temp.humidity
+      }
+      res.json(tempData);
+    })().catch(next)
   },
   getTempDatas : async function(req, res, next) {
     const client = await pool.connect();

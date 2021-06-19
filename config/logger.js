@@ -23,8 +23,8 @@ const logger = module.exports = winston.createLogger({
     // - Write all logs with level `error` and below to `error.log`
     // - Write all logs with level `info` and below to `combined.log`
     //
-    new winston.transports.Console(),
+    new winston.transports.Console({level : "debug"}),
     new winston.transports.File({ filename: config[env].logFilePath+"error.log", level: 'error' }),
-    new winston.transports.File({ filename: config[env].logFilePath+moment().format(config.dateString.log).concat('.log'), level: 'info' }),
+    new winston.transports.File({ filename: config[env].logFilePath+moment().format(config.dateString.log).concat('.log'), level: 'debug' }),
   ],
 });

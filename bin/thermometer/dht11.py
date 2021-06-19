@@ -10,9 +10,10 @@ GPIO.setmode(GPIO.BCM)
 # read data using pin 14
 instance = dht11.DHT11(pin=14)
 
+result = ""
 try:
-    result = instance.read()
     while True:
+        result = instance.read()
         if result.is_valid():
             data = {
                 "temperature" : result.temperature,

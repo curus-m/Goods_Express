@@ -3,6 +3,7 @@ import dht11
 import time
 import datetime
 import json
+import sys
 # initialize GPIO
 GPIO.setwarnings(True)
 GPIO.setmode(GPIO.BCM)
@@ -23,7 +24,7 @@ try:
                 f.write(json.dumps(data))
             time.sleep(10)
         else:
-            print("error!")
-except KeyboardInterrupt:
-    print("Cleanup")
+            print("data error!")
+except:
     GPIO.cleanup()
+    print("Unexpected error:", sys.exc_info()[0])

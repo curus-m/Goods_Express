@@ -12,7 +12,11 @@ const app = express();
 const config = require('./config/config');
 const env = app.get('env');
 const schedule = require('node-schedule');
-const thermoLogger = require('./bin/thermometer/thermometer');
+const temperature = require('./bin/temperature');
+const moment = require('moment');
+const { graphqlHTTP } = require('express-graphql');
+const graphqlSchema = require('./bin/graphql/schema');
+const graphqlResolver = require('./bin/graphql/resolver');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -32,10 +36,7 @@ app.use('/resource', resourceRouter);
 app.use('/users', usersRouter);
 app.options('/getTemp', cors());
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
+
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -51,7 +52,25 @@ logger.info(`App Initialized! : ${env} mode`);
 
 // set temperature check
 const job = schedule.scheduleJob("0 */20 * * * *", async function () {
-  thermoLogger.addTemperature();
+  if(env == "production") {
+    temperature.addTempData();
+  } else {
+    logger.info("thermometer check skipped on"+ moment().format(config.dateString.temperature));
+  }
 });
 
+//setup graphQL
+app.use(
+  '/temperature',
+  graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: env === 'development'
+  }),
+);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
 module.exports = app;

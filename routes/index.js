@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/getTemp', function(req, res, next) {
   next();
-}, temperature.getTemp);
+}, temperature.getTempData);
 router.get('/getTempDatas', function(req, res, next) {
   next();
 }, temperature.getTempDatas);

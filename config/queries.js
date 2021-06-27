@@ -12,5 +12,5 @@ module.exports = {
                               releaseDate=$6, description=$7 where id=$1`,
     getMaterialList: `select name as text, value from material order by value`,
     createTemperatureData: `insert into temperature(date, temperature, humidity) values(to_timestamp($1,'YYYY-MM-DD HH24:MI:00'), $2, $3)`,
-    getTemperatureDatas: `select date, temperature from temperature order by date desc limit 10 offset 0`
+    getTemperatureDatas: `select date as time, temperature, humidity from temperature order by date desc limit 20 offset 0`
   }

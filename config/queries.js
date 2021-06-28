@@ -1,3 +1,4 @@
+const config = require('./config');
 module.exports = {
     getDakiList: "select id, name, image from dakimakura where upper(name) like upper($1) or upper(brand) like upper($1) or description like upper($1) and material between $2 and $3 order by id desc limit $4 offset $5",
     getDakiItem: "select dakimakura.id, dakimakura.name, dakimakura.brand, dakimakura.price, to_char(dakimakura.releaseDate, 'YYYY-MM-DD') as releasedate, material.name as material,  dakimakura.description,  dakimakura.image from dakimakura, material where dakimakura.id=$1 and dakimakura.material = material.value",
@@ -11,6 +12,6 @@ module.exports = {
     updateDakimakuraNoImage: `update dakimakura set name=$2, brand=$3, price=$4, material=$5,
                               releaseDate=$6, description=$7 where id=$1`,
     getMaterialList: `select name as text, value from material order by value`,
-    createTemperatureData: `insert into temperature(date, temperature, humidity) values(to_timestamp($1,'YYYY-MM-DD HH24:MI:00'), $2, $3)`,
-    getTemperatureDatas: `select date as time, temperature, humidity from temperature order by date desc limit 20 offset 0`
+    createTemperatureData: `insert into temperature(date, temperature, humidity) values(to_timestamp($1, ${config.dateString.postgreTimestamp}), $2, $3)`,
+    getTemperatureDatas: `select to_char(date, ${config.dateString.postgreTimestamp}) as time, temperature, humidity from temperature order by date desc limit 20 offset 0`
   }

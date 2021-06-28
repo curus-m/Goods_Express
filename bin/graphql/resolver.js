@@ -6,8 +6,9 @@ const config = require('../../config/config')
 const pool = new Pool(config[env].postgre);
 const queries = require('../../config/queries');
 const dht11 = require('../dht11');
-const temperature = require('../temperature');
+// const temperature = require('../temperature');
 const moment = require('moment');
+const logger = require('../../config/logger');
 module.exports = { 
     tempData : async () => {
         let tempData = await dht11.getTemperature();
@@ -18,8 +19,8 @@ module.exports = {
         const client = await pool.connect();
         const query = queries.getTemperatureDatas;
         try {
-            const result = await client.query(query);
-            return result.rows;
+            const data = await client.query(query);
+            return data.rows;
         } catch (error) {
             logger.error(error.stack);
         } finally {

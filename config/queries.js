@@ -16,6 +16,6 @@ module.exports = {
     getTemperatureDatas: `select to_char(data.date, 'MM/DD HH24:MI') as time, 
       data.temperature, data.humidity from (select * from temperature order by date desc limit 72 offset 0) as data order by data.date asc`,
     getTemperatureMaxMins: `select max(temperature) as maxTemp, max(humidity) as maxHumidity, min(temperature) as minTemp, min(humidity) as minHumidity, 
-    to_char(date, 'YYYY-MM-DD') as time from temperature where to_char(date, 'YYYY-MM-DD') between $1 and $2 group by to_char(date, 'YYYY-MM-DD') order by time desc`
+    to_char(date, 'YYYY-MM-DD') as time from temperature where to_char(date, 'YYYY-MM-DD') between $1 and $2 group by to_char(date, 'YYYY-MM-DD') order by time asc`
   }
   

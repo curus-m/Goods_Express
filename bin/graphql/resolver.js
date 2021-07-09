@@ -30,9 +30,9 @@ module.exports = {
     tempMaxMins : async() => {
         const client = await pool.connect();
         const query = queries.getTemperatureMaxMins;
-        const before = moment().add(-7, 'd').format(config.dateString.postgreSearchQuery)
-        const today = moment().format(config.dateString.postgreSearchQuery);
-        const param = [before, today]
+        const before = moment().add(-8, 'd').format(config.dateString.postgreSearchQuery)
+        const yesterday = moment().add(-1, 'd').format(config.dateString.postgreSearchQuery);
+        const param = [before, yesterday]
         try {
             const data = await client.query(query, param);
             return data.rows;

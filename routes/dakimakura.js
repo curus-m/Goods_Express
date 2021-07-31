@@ -33,6 +33,6 @@ router.get('/:id', function (req, res, next) {
   }, dakimakura.getItem);
 
 router.delete('/:id', dakimakura.delete);
-router.post('/', upload.single('file'), dakimakura.create);
+router.post('/', upload.single('file'), dakimakura.addItem);
 router.put('/:id', upload.single('file'), dakimakura.update);
 module.exports = router;

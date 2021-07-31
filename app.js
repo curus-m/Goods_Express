@@ -51,13 +51,21 @@ app.use(function(err, req, res, next) {
 logger.info(`App Initialized! : ${env} mode`);
 
 // set temperature check
-const job = schedule.scheduleJob("0 */20 * * * *", async function () {
+const addTemperatureJob = schedule.scheduleJob("0 */20 * * * *", async function () {
   if(env == "production") {
     temperature.addTempData();
   } else {
     logger.info("thermometer check skipped on"+ moment().format(config.dateString.temperature));
   }
 });
+
+const addWeatherJob = schedule.scheduleJob("0 0 * * * *", async function () {
+  if(env == "production") {
+    temperature.addWeatherData();
+  } else {
+    logger.info("weather check skipped on"+ moment().format(config.dateString.temperature));
+  }
+}); 
 
 //setup graphQL
 app.use(

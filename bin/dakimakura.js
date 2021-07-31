@@ -162,7 +162,7 @@ module.exports = {
         }
         
     },
-    create : async function(req, res, next) {
+    addItem : async function(req, res, next) {
         const myData = JSON.parse(req.body.data);
         const isOk = checkData(myData);
         if(!isOk) {

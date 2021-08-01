@@ -59,9 +59,9 @@ const addTemperatureJob = schedule.scheduleJob("0 */20 * * * *", async function 
   }
 });
 
-const addWeatherJob = schedule.scheduleJob("0 0 * * * *", async function () {
+const addWeatherJob = schedule.scheduleJob("0 0 9 * * *", async function () {
   if(env == "production") {
-    temperature.addWeatherData();
+    weather.addWeatherData();
   } else {
     logger.info("weather check skipped on"+ moment().format(config.dateString.temperature));
   }

@@ -3,44 +3,41 @@ const app = express();
 const env = app.get('env');
 const config = require('../config/config')
 const moment = require('moment');
-const dht11 = require('./dht11');
 const { Pool } = require('pg')
 const pool = new Pool(config[env].postgre);
 const queries = require('../config/queries');
 const logger = require('../config/logger');
+const axios = require('axios');
 module.exports = {
-  addTempData: async function() {
-    let tempData = await dht11.getTemperature();
-    // logger.debug(tempData);
-    let date = moment().format(config.dateString.temperature);
+  addWeatherData: async function() {
+    let weatherData = await axios.get("https://api.openweathermap.org/data/2.5/weather?appid=f9d082a02abb985d3cea23277103fc79&id=1853909&units=metric");
+    let {weathers, main :{temp, temp_min, temp_max, humidity,
+      }} = weatherData;
+    const weatherId = weathers.reduce(a,b => a.id.concat(" ").concat(b.id));
+    let date = moment().format(config.dateString.postgreSearchQuery);
     const client = await pool.connect();
-    const query = queries.addTemperatureData;
-    const param = [date, tempData.temperature, tempData.humidity]
+    const query = queries.addWeatherData;
+    const param = [date, temp, temp_min, temp_max, humidity, weatherId]
     try {
         const result = await client.query(query, param);
-        // const data = result.rows[0];
-        logger.debug(`[${date}] ${tempData.temperature}℃, ${tempData.humidity}%`);
+        logger.info("add weatherData Success: " +result);
+        // logger.error(error.stack);
     } catch (error) {
         logger.error(error.stack);
     } finally {
         client.release()
     }
   },
-  getTempData: function(req, res, next) {
-    // logger.log("info", `Now temperature is ${temp}℃`);
+  getTodayWeatherData: function(req, res, next) {
+    // get Weather data from DB
     (async () => {
       let date = moment().format(config.dateString.temperature);
-      let temp = await dht11.getTemperature();
       // logger.debug("tempData: " +temp);
-      const tempData = {
-          "time": date,
-          "temperature": temp.temperature,
-          "humidity": temp.humidity
-      }
-      res.json(tempData);
+      
+      res.json("");
     })().catch(next)
   },
-  getTempDatas : async function(req, res, next) {
+  getWeatherDatas : async function(req, res, next) {
     const client = await pool.connect();
     const query = queries.getTemperatureDatas;
     // const param = [date, temp, 0]

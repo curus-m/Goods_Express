@@ -12,10 +12,12 @@ module.exports = {
     updateDakimakuraNoImage: `update dakimakura set name=$2, brand=$3, price=$4, material=$5,
                               releaseDate=$6, description=$7 where id=$1`,
     getMaterialList: `select name as text, value from material order by value`,
-    createTemperatureData: `insert into temperature(date, temperature, humidity) values(to_timestamp($1, 'YYYY-MM-DD HH24:MI:00'), $2, $3)`,
+    addTemperatureData: `insert into temperature(date, temperature, humidity) values(to_timestamp($1, 'YYYY-MM-DD HH24:MI:00'), $2, $3)`,
     getTemperatureDatas: `select to_char(data.date, 'MM/DD HH24:MI') as time, 
       data.temperature, data.humidity from (select * from temperature order by date desc limit 72 offset 0) as data order by data.date asc`,
     getTemperatureMaxMins: `select max(temperature) as maxTemp, max(humidity) as maxHumidity, min(temperature) as minTemp, min(humidity) as minHumidity, 
-    to_char(date, 'YYYY-MM-DD') as time from temperature where to_char(date, 'YYYY-MM-DD') between $1 and $2 group by to_char(date, 'YYYY-MM-DD') order by time asc`
+    to_char(date, 'YYYY-MM-DD') as time from temperature where to_char(date, 'YYYY-MM-DD') between $1 and $2 group by to_char(date, 'YYYY-MM-DD') order by time asc`,
+    addWeatherData : `insert into weather (date, temp, temp_min, temp_max, humidity, weatherId) values($1, $2, $3, $4, $5, $6)`
   }
+  
   

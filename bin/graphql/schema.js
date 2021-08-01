@@ -5,7 +5,6 @@ module.exports = buildSchema(`
       tempData: TempData
       tempDatas: [TempData]
       tempMaxMins:[TempData]
-      user: User
     }
     type TempData {
       time: String,

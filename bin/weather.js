@@ -13,7 +13,7 @@ module.exports = {
     let weatherData = await axios.get("https://api.openweathermap.org/data/2.5/weather?appid=f9d082a02abb985d3cea23277103fc79&id=1853909&units=metric");
     let {weather, main :{temp, temp_min, temp_max, humidity,
     }} = weatherData.data;
-    const weatherId = weather.reduce((a,b) => a.id.concat(" ").concat(b.id));
+    const weatherId = weather.map(item => item.id).join(" ");
     let date = moment().format(config.dateString.postgreSearchQuery);
     const client = await pool.connect();
     const query = queries.addWeatherData;

@@ -17,6 +17,8 @@ const moment = require('moment');
 const { graphqlHTTP } = require('express-graphql');
 const graphqlSchema = require('./bin/graphql/schema');
 const graphqlResolver = require('./bin/graphql/resolver');
+const weather = require('./bin/weather');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

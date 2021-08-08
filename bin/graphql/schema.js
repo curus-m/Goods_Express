@@ -5,6 +5,7 @@ module.exports = buildSchema(`
       tempData: TempData
       tempDatas: [TempData]
       tempMaxMins:[TempData]
+      dailyTemperatures: [TempData]
     }
     type TempData {
       time: String,
@@ -14,5 +15,6 @@ module.exports = buildSchema(`
       maxhumidity: Float,
       mintemp: Float,
       minhumidity: Float,
+      weatherid : String
     }
  `)

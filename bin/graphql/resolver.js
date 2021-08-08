@@ -41,5 +41,17 @@ module.exports = {
         } finally {
             client.release();
         }
+    },
+    dailyTemperatures: async() => {
+        const client = await pool.connect();
+        const query = queries.getDailyWeather;
+        try {
+            const data = await client.query(query);
+            return data.rows;
+        } catch (error) {
+            logger.error(error.stack);
+        } finally {
+            client.release();
+        }
     }
 }

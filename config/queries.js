@@ -17,7 +17,6 @@ module.exports = {
       data.temperature, data.humidity from (select * from temperature order by date desc limit 72 offset 0) as data order by data.date asc`,
     getTemperatureMaxMins: `select max(temperature) as maxTemp, max(humidity) as maxHumidity, min(temperature) as minTemp, min(humidity) as minHumidity, 
     to_char(date, 'YYYY-MM-DD') as time from temperature where to_char(date, 'YYYY-MM-DD') between $1 and $2 group by to_char(date, 'YYYY-MM-DD') order by time asc`,
-    addWeatherData : `insert into weather (date, temp, temp_min, temp_max, humidity, weatherId) values($1, $2, $3, $4, $5, $6)`
+    addWeatherData : `insert into weather (date, temp, temp_min, temp_max, humidity, weatherId) values($1, $2, $3, $4, $5, $6)`,
+    getDailyWeather: `select to_char(date, 'YYYY-MM-DD') as time, temp as temperature, humidity, temp_min as mintemp, temp_max as maxtemp, weatherid from weather order by date asc limit 8`
   }
-  
-  

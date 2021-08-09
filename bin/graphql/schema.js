@@ -15,6 +15,8 @@ module.exports = buildSchema(`
       maxhumidity: Float,
       mintemp: Float,
       minhumidity: Float,
-      weatherid : String
+      weathername : String,
+      description : String,
+      icons: [String]
     }
  `)

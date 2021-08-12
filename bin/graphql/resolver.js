@@ -47,7 +47,7 @@ module.exports = {
         const query = queries.getDailyWeather;
         try {
             const data = await client.query(query);
-            return data.rows;
+            return data.rows.reverse();
         } catch (error) {
             logger.error(error.stack);
         } finally {

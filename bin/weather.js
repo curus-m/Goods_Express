@@ -15,15 +15,16 @@ module.exports = {
     }} = weatherData.data;
     const weatherId = weather.map(item => item.id).join(" ");
     let date = moment().format(config.dateString.postgreSearchQuery);
+    logger.info("weatherID: " +weatherId + "date: " + date);
     const client = await pool.connect();
     const query = queries.addWeatherData;
     const param = [date, temp, temp_min, temp_max, humidity, weatherId]
     try {
         const result = await client.query(query, param);
-        logger.info("add weatherData Success: " +result);
-        // logger.error(error.stack);
+        logger.info("add weatherData Success: " +result.toString());
     } catch (error) {
         logger.error(error.stack);
+        logger.error("param" + param.toString());
     } finally {
         client.release()
     }

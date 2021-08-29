@@ -6,11 +6,11 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/getTemp', function(req, res, next) {
-  next();
-}, temperature.getTempData);
-router.get('/getTempDatas', function(req, res, next) {
-  next();
-}, temperature.getTempDatas);
+// router.get('/getTemp', function(req, res, next) {
+//   next();
+// }, temperature.getTempData);
+// router.get('/getTempDatas', function(req, res, next) {
+//   next();
+// }, temperature.getTempDatas);
 
 module.exports = router;

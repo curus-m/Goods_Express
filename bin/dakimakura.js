@@ -210,45 +210,6 @@ module.exports = {
         }finally {
 
         } 
-        /*
-        try {
-
-            
-        const client = await pool.connect()
-        const query = queries.addDakimakura
-        const uploadedFileName = myData.fileName;
-
-            if (myData.fileName) { 
-                let newFileName = getNewFileName(myData.fileName);
-                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, newFileName]
-                console.log(param);
-                client.query(query,param).then((result) => {
-                    console.log("Successfully added");
-                    if (oluploadeileName != defaultImageName) { 
-                        changeuploadele(oldFileName, newFileName);
-                    }
-                    res.json({ message: 'OK' });
-                }, (error) => {
-                    console.log(error);
-                    console.log("Fail!");
-                    if (oluploadeileName != defaultImageName) { deleteFile(oldFileName); }
-                })
-            } else { 
-                let defaultFileName = defaultImageName;
-                const param = [myData.name, myData.brand, myData.price, myData.releasedate, myData.material, myData.description, defaultFileName]
-                client.query(query,param).then((result) => {
-                    console.log("Successfully added");
-                }, (error) => {
-                    console.log(error);
-                    console.log("Fail!");
-                });
-            }
-        } catch (error) {
-            console.log(error.stack);
-            res.status(500).send({ message: 'Invalid Data!' , contents: error.stack});
-        }finally {
-            client.release();
-        } */
     },
     update: async function(req, res, next) {
         const myData = JSON.parse(req.body.data);
@@ -300,6 +261,22 @@ module.exports = {
             if(filename !== defaultImageName) {
                 deleteImage(filename);
             }
+        } catch(error) {
+            logger.error(error.stack);
+            res.status(500).send({ message: 'error!', contents : error.stack});
+        }finally {
+            client.release();
+        }
+    },
+    getCount : async function (req, res, next) {
+        const client = await pool.connect();
+        try {
+            const query = queries.getDakiCount;
+            let result = await client.query(query);
+            const data = result.rows[0];
+            logger.debug(`Get count: ${data}`);
+            let {count} = data;
+            res.json(count);
         } catch(error) {
             logger.error(error.stack);
             res.status(500).send({ message: 'error!', contents : error.stack});

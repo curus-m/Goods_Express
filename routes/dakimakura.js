@@ -25,6 +25,11 @@ router.get('/', function(req, res, next) {
     next();
 }, dakimakura.getList);
 
+router.get('/count', function (req, res, next) {
+  // pass count
+  next();
+}, dakimakura.getCount);
+
 router.get('/:id', function (req, res, next) {
     // if the user ID is 0, skip to the next router
     if (req.params.id == 0) next('route');

@@ -272,11 +272,10 @@ module.exports = {
         const client = await pool.connect();
         try {
             const query = queries.getDakiCount;
-            let result = await client.query(query);
+            const result = await client.query(query);
             const data = result.rows[0];
-            logger.debug(`Get count: ${data}`);
-            let {count} = data;
-            res.json(count);
+            logger.debug(`Get count: ${data.count}`);
+            res.json(data);
         } catch(error) {
             logger.error(error.stack);
             res.status(500).send({ message: 'error!', contents : error.stack});

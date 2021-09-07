@@ -85,23 +85,6 @@ const createThumbnail = function(filename) {
     .catch(err => logger.error(err));
 
 }
-/*
-const deleteFileOnS3 = function(fileName) {
-    const deleteParams = {
-        Bucket: config.bucketName, 
-        Key:  `${config.dakimakuraFolder}${fileName}`,
-    }
-    let s3 = new AWS.S3(s3Config);
-    s3.deleteObject(deleteParams, (err, data) => {
-        if (err) { 
-            console.log(err, err.stack); // an error occurred
-            throw Error(err);
-        }
-        else {
-            console.log("delete Complete")
-        }
-    });
-}*/
 module.exports = {
     getItem: async function(req, res, next) {
         const no = req.params.id;
@@ -124,34 +107,19 @@ module.exports = {
     getList: async function(req, res, next) {
         let date = new Date();
         logger.debug(">>>> Get List on " + date.toISOString());
-
         const pages = req.query.page ? req.query.page : 1;
-        let searchQuery = req.query.query ? req.query.query : '';
+        let searchQuery = req.query.query ?? '';
         searchQuery = `%${searchQuery}%`;
-        const category = req.query.category ? req.query.category : 0;
-        let categoryStart, categoryEnd;
-        if(category == 0)
-        {
-            categoryStart = 0;
-            categoryEnd = 10;
-        } else {
-            categoryStart = category;
-            categoryEnd = category;
-        }
-        logger.info(`page: ${pages} , query: ${req.query.query}, category: ${category}`);
+        logger.info(`page: ${pages} , query: ${req.query.query}`);
         let offset = pageItems * (pages-1);
         const client = await pool.connect();
         const dakiListQuery = queries.getDakiList;
-        const dakiListParam = [searchQuery, categoryStart, categoryEnd, pageItems, offset];
+        const dakiListParam = [searchQuery, pageItems, offset];
         const dakiCountQuery = queries.getTotalDakimakura;
-        const dakiCountParam = [searchQuery, categoryStart, categoryEnd]
         try {
             const dakiList = await client.query(dakiListQuery, dakiListParam);
-            let count = await client.query(dakiCountQuery, dakiCountParam);
-            count = Math.ceil(count.rows[0].count/pageItems);
             const data = {
                 dakimakuras: dakiList.rows,
-                totalPages: count
             }
             res.json(data);
         } catch(err){

@@ -1,6 +1,6 @@
 
 module.exports = {
-    getDakiList: "select id, name, image from dakimakura where upper(name) like upper($1) or upper(brand) like upper($1) or description like upper($1) and material between $2 and $3 order by id desc limit $4 offset $5",
+    getDakiList: "select id, name, image, r18 from dakimakura where upper(name) like upper($1) or upper(brand) like upper($1) or description like upper($1) order by id desc limit $2 offset $3",
     getDakiItem: "select dakimakura.id, dakimakura.name, dakimakura.brand, dakimakura.price, to_char(dakimakura.releaseDate, 'YYYY-MM-DD') as releasedate, material.name as material,  dakimakura.description,  dakimakura.image from dakimakura, material where dakimakura.id=$1 and dakimakura.material = material.value",
     getDakiId: "select dakimakura.id from dakimakura where dakimakura.name=$1 and dakimakura.brand=$2 and dakimakura.price=$3",
     getTotalDakimakura: "select count(*) from dakimakura where name like $1 and material between $2 and $3",
